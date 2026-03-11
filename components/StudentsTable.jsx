@@ -82,9 +82,10 @@ export default function StudentsTable({ onLogout, user }) {
   const [errors,     setErrors]     = useState({});
   const [submitting, setSubmitting] = useState(false);
   const [toasts,     setToasts]     = useState([]);
-  const [sortCfg,    setSortCfg]    = useState({ key: "name", dir: "asc" });
-  const [selIds,     setSelIds]     = useState(new Set());
-  const [menuOpen,   setMenuOpen]   = useState(false);
+  const [sortCfg,      setSortCfg]      = useState({ key: "name", dir: "asc" });
+  const [selIds,       setSelIds]       = useState(new Set());
+  const [menuOpen,     setMenuOpen]     = useState(false);
+  const [signOutModal, setSignOutModal] = useState(false);
 
   const addToast    = useCallback((msg, type = "success") => setToasts((t) => [...t, { id: Date.now() + Math.random(), msg, type }]), []);
   const removeToast = useCallback((id) => setToasts((t) => t.filter((x) => x.id !== id)), []);
@@ -259,7 +260,7 @@ export default function StudentsTable({ onLogout, user }) {
               )}
 
               {/* Sign out */}
-              <button onClick={onLogout} aria-label="Sign out"
+              <button onClick={() => setSignOutModal(true)} aria-label="Sign out"
                 style={{ background:"transparent", border:"1px solid #1e293b", color:"#64748b", borderRadius:9, padding:"8px clamp(8px,2vw,14px)", fontSize:13, fontWeight:500, cursor:"pointer", fontFamily:"'Inter',sans-serif", display:"flex", alignItems:"center", gap:6, transition:"all 0.15s" }}
                 onMouseEnter={(e) => { e.currentTarget.style.borderColor="#ef4444"; e.currentTarget.style.color="#f87171"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.borderColor="#1e293b"; e.currentTarget.style.color="#64748b"; }}>
@@ -500,6 +501,154 @@ export default function StudentsTable({ onLogout, user }) {
           #mobile-list { display: none !important; }
         }
       `}</style>
+
+      {/* ── Sign-out confirmation modal ───────────────────────────────── */}
+      {signOutModal && (
+        <div
+          onClick={(e) => { if (e.target === e.currentTarget) setSignOutModal(false); }}
+          role="dialog" aria-modal="true" aria-label="Confirm sign out"
+          style={{
+            position:"fixed", inset:0,
+            background:"rgba(2,8,23,0.88)",
+            backdropFilter:"blur(10px)",
+            zIndex:2000,
+            display:"flex", alignItems:"center", justifyContent:"center",
+            padding:16,
+            animation:"fadeIn 0.18s ease",
+          }}
+        >
+          <div style={{
+            background:"#0b1629",
+            border:"1.5px solid rgba(99,102,241,0.25)",
+            borderRadius:"clamp(14px,3vw,20px)",
+            width:"100%", maxWidth:400,
+            padding:"clamp(24px,4vw,32px)",
+            animation:"slideIn 0.22s ease",
+            boxShadow:"0 32px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(99,102,241,0.08)",
+          }}>
+
+            {/* Icon */}
+            <div style={{
+              width:54, height:54, borderRadius:15,
+              background:"rgba(99,102,241,0.1)",
+              border:"1.5px solid rgba(99,102,241,0.25)",
+              display:"flex", alignItems:"center", justifyContent:"center",
+              marginBottom:20,
+            }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="1.8">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+            </div>
+
+            {/* Text */}
+            <h2 style={{
+              fontFamily:"'Outfit',sans-serif",
+              fontSize:"clamp(18px,3vw,22px)",
+              fontWeight:700, color:"#f1f5f9",
+              marginBottom:10, letterSpacing:"-0.02em",
+            }}>
+              Sign out?
+            </h2>
+            <p style={{
+              fontFamily:"'Inter',sans-serif",
+              color:"#64748b", fontSize:14,
+              lineHeight:1.65, marginBottom:28,
+            }}>
+              You will be signed out of your admin session.
+              {user?.displayName && (
+                <span> Goodbye, <strong style={{ color:"#94a3b8" }}>{user.displayName}</strong>!</span>
+              )}
+            </p>
+
+            {/* User info strip */}
+            {user && (
+              <div style={{
+                display:"flex", alignItems:"center", gap:12,
+                background:"#070f1c",
+                border:"1px solid #1e3a5f",
+                borderRadius:12, padding:"12px 14px",
+                marginBottom:24,
+              }}>
+                <div style={{
+                  width:38, height:38, borderRadius:"50%",
+                  background:"linear-gradient(135deg,#6366f1,#4f46e5)",
+                  display:"flex", alignItems:"center", justifyContent:"center",
+                  fontSize:14, fontWeight:700, color:"#fff",
+                  fontFamily:"'Outfit',sans-serif", flexShrink:0,
+                }}>
+                  {(user.displayName||user.username||"A")[0].toUpperCase()}
+                </div>
+                <div style={{ minWidth:0 }}>
+                  <div style={{ fontFamily:"'Inter',sans-serif", fontSize:14, fontWeight:600, color:"#e2e8f0", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                    {user.displayName || user.username}
+                  </div>
+                  <div style={{ fontFamily:"'Inter',sans-serif", fontSize:11, color:"#475569", marginTop:2 }}>
+                    Admin · Active session
+                  </div>
+                </div>
+                <div style={{
+                  marginLeft:"auto", background:"#052e16",
+                  border:"1px solid #166534", borderRadius:20,
+                  padding:"3px 10px", display:"flex", alignItems:"center", gap:5, flexShrink:0,
+                }}>
+                  <span style={{ width:6, height:6, borderRadius:"50%", background:"#4ade80", boxShadow:"0 0 4px #4ade80" }} />
+                  <span style={{ fontSize:10, fontWeight:600, color:"#4ade80", fontFamily:"'Inter',sans-serif" }}>Online</span>
+                </div>
+              </div>
+            )}
+
+            {/* Buttons */}
+            <div style={{ display:"flex", gap:10 }}>
+              <button
+                onClick={() => setSignOutModal(false)}
+                style={{
+                  flex:1,
+                  background:"#0f172a",
+                  border:"1.5px solid #1e293b",
+                  color:"#94a3b8",
+                  borderRadius:11, padding:"12px",
+                  fontSize:14, fontWeight:600,
+                  cursor:"pointer",
+                  fontFamily:"'Inter',sans-serif",
+                  transition:"border-color 0.15s, color 0.15s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.borderColor="#334155"; e.currentTarget.style.color="#e2e8f0"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.borderColor="#1e293b"; e.currentTarget.style.color="#94a3b8"; }}
+              >
+                Stay
+              </button>
+              <button
+                onClick={() => { setSignOutModal(false); onLogout(); }}
+                style={{
+                  flex:2,
+                  background:"linear-gradient(135deg,#4f46e5,#6366f1)",
+                  border:"none",
+                  color:"#fff",
+                  borderRadius:11, padding:"12px",
+                  fontSize:14, fontWeight:600,
+                  cursor:"pointer",
+                  fontFamily:"'Inter',sans-serif",
+                  display:"flex", alignItems:"center", justifyContent:"center", gap:8,
+                  boxShadow:"0 4px 14px rgba(99,102,241,0.35)",
+                  transition:"opacity 0.15s, transform 0.1s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.transform="translateY(-1px)"; e.currentTarget.style.boxShadow="0 6px 20px rgba(99,102,241,0.5)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.transform="none"; e.currentTarget.style.boxShadow="0 4px 14px rgba(99,102,241,0.35)"; }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                  <polyline points="16 17 21 12 16 7"/>
+                  <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Yes, Sign Out
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </>
   );
 }
