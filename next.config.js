@@ -1,3 +1,9 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
-module.exports = nextConfig
+const nextConfig = {
+  // Ensure API routes are never statically optimized
+  experimental: {
+    serverComponentsExternalPackages: ["mongoose"],
+  },
+};
+
+module.exports = nextConfig;
