@@ -1,5 +1,23 @@
 {
-"rewrites": [
-    {"source": "/(.*)", "destination": "/"}
-]
+  "functions": {
+    "app/api/students/[id]/route.js": {
+      "maxDuration": 30
+    },
+    "app/api/students/route.js": {
+      "maxDuration": 30
+    },
+    "app/api/auth/login/route.js": {
+      "maxDuration": 30
+    }
+  },
+  "headers": [
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin",  "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, PUT, DELETE, OPTIONS, PATCH" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization" }
+      ]
+    }
+  ]
 }
